@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import authorization.AccessController;
 import dataTypes.Track;
 import spotify.TitleFinder;
 import youtube.YTDownloader;
@@ -18,7 +19,6 @@ import youtube.YTSearch;
 public class SYConverter {
 
 	public static void main(String[] args) throws IOException {
-		
 		Queue<Track> tracks = new LinkedList<Track>();
 		
 		if(args.length == 0 || args[0].contains("current")) {
@@ -45,5 +45,12 @@ public class SYConverter {
 		
 		//TODO print exit status
 	}
+	/**
+	 //Testing AccessController
+	public static void main(String[] args) {
+		AccessController ac = new AccessController(new String[] {"playlist-modify-private"});
+		System.out.println(ac.getAccessToken());
+	}
+	*/
 
 }
