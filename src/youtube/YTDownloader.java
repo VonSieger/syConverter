@@ -36,7 +36,7 @@ public class YTDownloader implements Runnable{
 			return null;
 		try {
 			Process youtubeDL = new ProcessBuilder("youtube-dl",
-					"-o" + musicTrack.getTitle() + "-" + musicTrack.getArtist() + ".%(ext)s'",
+					"-o" + musicTrack.getTitle() + "-" + musicTrack.getArtists()[0] + ".%(ext)s'",
 					"-x", "--audio-format", "mp3",
 					musicTrack.getUrl()).start();
 			return youtubeDL;

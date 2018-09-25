@@ -8,17 +8,17 @@ package dataTypes;
 
 public class Track {
 	private String title;
-	private String artist;
+	private String[] artists;
 	private String url;
 	
 	/**
 	 * 
 	 * @param title
-	 * @param artist
+	 * @param artists
 	 */
-	public Track(String title, String artist) {
+	public Track(String title, String[] artists) {
 		this.title = title;
-		this.artist = artist;
+		this.artists = artists;
 	}
 
 	/**
@@ -29,10 +29,10 @@ public class Track {
 	}
 
 	/**
-	 * @return the artist
+	 * @return the artists
 	 */
-	public String getArtist() {
-		return artist;
+	public String[] getArtists() {
+		return artists;
 	}
 
 	/**

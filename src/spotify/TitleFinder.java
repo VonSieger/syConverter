@@ -33,7 +33,7 @@ public class TitleFinder {
 			BufferedReader titleReader = new BufferedReader(new InputStreamReader(titleStream));
 			BufferedReader artistReader = new BufferedReader(new InputStreamReader(artistStream));
 			
-			return new Track(titleReader.readLine(), artistReader.readLine());
+			return new Track(titleReader.readLine(), new String[] {artistReader.readLine()});
 		}catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);

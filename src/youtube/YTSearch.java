@@ -28,7 +28,7 @@ public class YTSearch {
 	private static final int MAX_ITEMS = 1;
 	//create your own API Key: https://developers.google.com/youtube/v3/getting-started
 	//No OAuth needed
-	private static final String API_KEY = "yourKey";
+	private static final String API_KEY = "yourkey";
 	
 	public YTSearch() {
 		

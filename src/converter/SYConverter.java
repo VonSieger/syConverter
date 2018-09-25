@@ -2,12 +2,20 @@ package converter;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.google.api.client.json.JsonParser;
+import com.google.api.client.json.JsonToken;
+
 import authorization.AccessController;
 import dataTypes.Track;
+import spotify.SpotifyPlaylist;
 import spotify.TitleFinder;
 import youtube.YTDownloader;
 import youtube.YTSearch;
@@ -19,38 +27,41 @@ import youtube.YTSearch;
 public class SYConverter {
 
 	public static void main(String[] args) throws IOException {
-		Queue<Track> tracks = new LinkedList<Track>();
+		List<String> parameters = Arrays.asList(args);
+		if(parameters.contains("current") && parameters.contains("playlist")) {
+			System.err.println("Error: Too many arguments");
+			System.exit(1);
+		}
+		List<Track> tracks = new LinkedList<Track>();
 		
-		if(args.length == 0 || args[0].contains("current")) {
+		if(parameters.size() == 0 || (parameters.contains("current") && parameters.size() == 1)) {//standard execution || parameters equals current
 			Track currentTrack = TitleFinder.getCurrentTrack();
-			if(currentTrack.getArtist() == null || currentTrack.getTitle() == null) {
-				System.out.println("No Track was found");
+			if(currentTrack.getArtists() == null || currentTrack.getTitle() == null) {
+				System.err.println("No Track was found");
 				System.exit(1);
 			}
-			currentTrack.setUrl(YTSearch.searchYouTube(currentTrack.getTitle() + " " + currentTrack.getArtist()));
 			tracks.add(currentTrack);
-		}else if(args[0].contains("playlist") && args.length == 2) {
-			
+		}else if(parameters.get(0).contains("playlist") && parameters.size() == 2) {//first argument must be playlist && playlist id must be given
+			SpotifyPlaylist spotifyPlaylist = new SpotifyPlaylist();
+			tracks = spotifyPlaylist.getPlaylist(parameters.get(1));
+			if(tracks == null)
+				System.exit(1);
+		}else {
+			System.err.println("Error: Invalid arguments");
+			System.exit(1);
 		}
+		//set url
+		for(Track track : tracks) 
+			track.setUrl(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
 		
-		Queue<Thread> downloads = new ArrayDeque<Thread>(tracks.size());
-		
-		while(!tracks.isEmpty()) {
-			YTDownloader downloader = new YTDownloader(tracks.peek());
+		//download tracks
+		for(Track track : tracks){
+			YTDownloader downloader = new YTDownloader(track);
 			Thread download = new Thread(downloader);
 			download.start();
-			System.out.println(tracks.poll().getUrl() + " is getting downloaded...");
-			downloads.add(download);
+			System.out.println(track.getUrl() + " is getting downloaded...");
+			//wait for download to be finished
+			while(download.isAlive());
 		}
-		
-		//TODO print exit status
 	}
-	/**
-	 //Testing AccessController
-	public static void main(String[] args) {
-		AccessController ac = new AccessController(new String[] {"playlist-modify-private"});
-		System.out.println(ac.getAccessToken());
-	}
-	*/
-
 }

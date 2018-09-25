@@ -21,6 +21,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
 /**
+ * Class providing access token from Spotify Web API according to the authorization code flow from OAuth2 protocol.
+ * Guide: https://developer.spotify.com/documentation/general/guides/authorization-guide/
  * @author boss
  *
  */
@@ -31,8 +33,11 @@ public class AccessController implements AccessTokenHandler{
 	//Parsing JSON
 	JacksonFactory jacksonFactory;
 	
-	private final String CLIENT_ID = "59a13315ca64421692510bc593279cb7";
-	private final String CLIENT_SECRET = "c846adcf20c34a869140e44d548ff478";
+	/*
+	 * 
+	 */
+	private final String CLIENT_ID = "yourkey";
+	private final String CLIENT_SECRET = "yourkey";
 	
 	//base URL for all endpoints
 	private final String BASE_URL = "https://accounts.spotify.com";
@@ -63,7 +68,6 @@ public class AccessController implements AccessTokenHandler{
 																						new ClientParametersAuthentication(CLIENT_ID, CLIENT_SECRET),
 																						CLIENT_ID,
 																						AUTHORIZATION_ENDPOINT);
-		//spezified by https://developer.spotify.com/documentation/general/guides/authorization-guide/
 		authorizationURL = AUTHORIZATION_ENDPOINT + "/?client_id=" + CLIENT_ID +
 				"&redirect_uri=" + SpotifyCallbackServer.getCallbackCodeURI() +
 				"&response_type=code";
@@ -90,10 +94,9 @@ public class AccessController implements AccessTokenHandler{
 	@Override
 	/**
 	 * Returns a valid access token from <BASE_URL> or null if an error occurred.
-	 * Possible errors:
-	 * SecurityException by opening the browser, User denies access, error from server for several reasons
+	 * @return String valid access token or null
+	 * @throws SecurityException by opening the browser, User denies access, error from server for several reasons
 	 */
-	//TODO stop server
 	public String getAccessToken() {
 		TokenResponse accessTokenResponse = null;
 		//no refresh token available
