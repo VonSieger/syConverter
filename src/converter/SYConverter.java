@@ -1,19 +1,9 @@
 package converter;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import com.google.api.client.json.JsonParser;
-import com.google.api.client.json.JsonToken;
-
-import authorization.AccessController;
 import dataTypes.Track;
 import spotify.SpotifyPlaylist;
 import spotify.TitleFinder;

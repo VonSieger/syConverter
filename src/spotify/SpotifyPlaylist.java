@@ -7,24 +7,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.http.HttpConnection;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*; 
-
-import com.google.api.client.json.jackson2.JacksonFactory;
 
 import authorization.AccessController;
 import dataTypes.Track;
@@ -37,11 +29,6 @@ public class SpotifyPlaylist implements PlaylistGetter {
 
 	private static String[] scopes = { "user-library-modify" };
 
-	private HttpClient client;
-
-	// Parsing Json-response
-	private JacksonFactory jacksonFactory;
-
 	// provides access token
 	private AccessController accessController;
 
@@ -52,8 +39,6 @@ public class SpotifyPlaylist implements PlaylistGetter {
 
 	public SpotifyPlaylist() {
 		accessController = new AccessController(scopes);
-		jacksonFactory = new JacksonFactory();
-		client = HttpClientBuilder.create().build();
 	}
 
 	@Override

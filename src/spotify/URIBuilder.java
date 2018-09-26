@@ -5,7 +5,6 @@ package spotify;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;

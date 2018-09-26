@@ -13,8 +13,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 //TODO handle access restriction warnings
 /**
