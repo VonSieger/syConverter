@@ -67,13 +67,15 @@ public class SYConverter {
 			track.setUrl(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
 		
 		//download tracks
-		for(Track track : tracks){
+		for(int i = 0; i < tracks.size(); i++){
+			Track track = tracks.get(i);
 			YTDownloader downloader = new YTDownloader(track);
 			Thread download = new Thread(downloader);
 			download.start();
 			System.out.println(track.getUrl() + " is getting downloaded...");
 			//wait for download to be finished
 			while(download.isAlive());
+			System.out.println(i +1 + "/" + tracks.size() + " downloaded");
 		}
 	}
 }
