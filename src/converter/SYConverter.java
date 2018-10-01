@@ -1,6 +1,7 @@
 package converter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,28 +19,49 @@ public class SYConverter {
 
 	public static void main(String[] args) throws IOException {
 		List<String> parameters = Arrays.asList(args);
-		if(parameters.contains("current") && parameters.contains("playlist")) {
-			System.err.println("Error: Too many arguments");
-			System.exit(1);
-		}
 		List<Track> tracks = new LinkedList<Track>();
 		
-		if(parameters.size() == 0 || (parameters.contains("current") && parameters.size() == 1)) {//standard execution || parameters equals current
-			Track currentTrack = TitleFinder.getCurrentTrack();
-			if(currentTrack.getArtists() == null || currentTrack.getTitle() == null) {
-				System.err.println("No Track was found");
+		//go through all parameters
+		for(Iterator<String> it = parameters.iterator(); it.hasNext();) {
+			String current = it.next();
+			//download current track
+			if(current.contains("current")) {
+				Track currentTrack = TitleFinder.getCurrentTrack();
+				if(currentTrack.getArtists() == null || currentTrack.getTitle() == null) {
+					System.err.println("No Track was found");
+					System.exit(1);
+				}
+				tracks.add(currentTrack);
+			}else if(current.contains("playlist") && it.hasNext()) {
+				SpotifyPlaylist spotifyPlaylist = new SpotifyPlaylist();
+				//get playlist with <id>
+				String uri = it.next();
+				if(uri.matches("spotify:user:.+:playlist:.+"))
+					tracks = spotifyPlaylist.getPlaylist(uri.split(":")[3]);
+				else {
+					System.err.println("Wrong Spotify URI: " + uri + "; NOTE Only playlists are valid");
+					System.exit(1);
+				}
+				if(tracks == null)
+					System.exit(1);
+			}else if(current.contains("help")){
+				System.out.println("Usage: syConverter [OPTIONS]\n"
+						+ "Download one or more songs from YouTube specified by Spotify, look into options for details.\n"
+						+ "Downloaded songs will be stored as a .mp3 files in \"<Title>-<Artist>.mp3\" format.\n"
+						+ "Options:\n"
+						+ "\t--help : Show this help and exit\n"
+						+ "\t--current : Dowload the current song. The current song is the song returned by playerctl(dbus).\n"
+						+ "\t--playlist <playlist-uri> : Download the specified playlist from youtube.\n"
+						+ "\t\t<playlist-uri>:\n"
+						+ "\t\tplaylist to download->...->Share->Copy Spotify URI");
+				System.exit(0);
+			}else {
+				System.err.println("Error: Invalid argument: " + current + 
+						"\nTry 'syController --help' for more information");
 				System.exit(1);
 			}
-			tracks.add(currentTrack);
-		}else if(parameters.get(0).contains("playlist") && parameters.size() == 2) {//first argument must be playlist && playlist id must be given
-			SpotifyPlaylist spotifyPlaylist = new SpotifyPlaylist();
-			tracks = spotifyPlaylist.getPlaylist(parameters.get(1));
-			if(tracks == null)
-				System.exit(1);
-		}else {
-			System.err.println("Error: Invalid arguments");
-			System.exit(1);
 		}
+		
 		//set url
 		for(Track track : tracks) 
 			track.setUrl(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
