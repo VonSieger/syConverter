@@ -57,7 +57,11 @@ public class YTDownloader implements Runnable{
 		BufferedReader rIs = new BufferedReader(new InputStreamReader(is));
 		String output = "";
 		
-		while(download.isAlive()) {}
+		try {
+			download.waitFor();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		try {
 			while(rIs.ready()) {
 				output += rIs.readLine() + "\n";

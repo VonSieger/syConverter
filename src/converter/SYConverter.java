@@ -16,8 +16,12 @@ import youtube.YTSearch;
  *
  */
 public class SYConverter {
-
-	public static void main(String[] args) throws IOException {
+	
+	public SYConverter() {
+		
+	}
+	
+	private void download(String[] args) {
 		List<String> parameters = Arrays.asList(args);
 		List<Track> tracks = new LinkedList<Track>();
 		
@@ -37,7 +41,7 @@ public class SYConverter {
 				//get playlist with <id>
 				String uri = it.next();
 				if(uri.matches("spotify:user:.+:playlist:.+"))
-					tracks = spotifyPlaylist.getPlaylist(uri.split(":")[3]);
+					tracks = spotifyPlaylist.getPlaylist(uri.split(":")[4]);
 				else {
 					System.err.println("Wrong Spotify URI: " + uri + "; NOTE Only playlists are valid");
 					System.exit(1);
@@ -61,7 +65,6 @@ public class SYConverter {
 				System.exit(1);
 			}
 		}
-		
 		//set url
 		for(Track track : tracks) 
 			track.setUrl(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
@@ -74,8 +77,16 @@ public class SYConverter {
 			download.start();
 			System.out.println(track.getUrl() + " is getting downloaded...");
 			//wait for download to be finished
-			while(download.isAlive());
+			try {
+				download.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			System.out.println(i +1 + "/" + tracks.size() + " downloaded");
 		}
+	}
+
+	public static void main(String[] args){
+		new SYConverter().download(args);
 	}
 }
