@@ -1,16 +1,12 @@
 package youtube;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.Set;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.*;
-import com.google.api.services.youtube.YouTube.Search.List;
 import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
@@ -28,7 +24,7 @@ public class YTSearch {
 	private static final int MAX_ITEMS = 1;
 	//create your own API Key: https://developers.google.com/youtube/v3/getting-started
 	//No OAuth needed
-	private static final String API_KEY = "yourKey";
+	private static final String API_KEY = "yourkey";
 	
 	public YTSearch() {
 		

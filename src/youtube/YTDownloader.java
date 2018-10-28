@@ -36,7 +36,7 @@ public class YTDownloader implements Runnable{
 			return null;
 		try {
 			Process youtubeDL = new ProcessBuilder("youtube-dl",
-					"-o" + musicTrack.getTitle() + "-" + musicTrack.getArtist() + ".%(ext)s'",
+					"-o" + musicTrack.getTitle() + "-" + musicTrack.getArtists()[0] + ".%(ext)s'",
 					"-x", "--audio-format", "mp3",
 					musicTrack.getUrl()).start();
 			return youtubeDL;
@@ -57,7 +57,11 @@ public class YTDownloader implements Runnable{
 		BufferedReader rIs = new BufferedReader(new InputStreamReader(is));
 		String output = "";
 		
-		while(download.isAlive()) {}
+		try {
+			download.waitFor();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		try {
 			while(rIs.ready()) {
 				output += rIs.readLine() + "\n";

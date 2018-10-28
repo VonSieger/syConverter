@@ -1,5 +1,7 @@
 package dataTypes;
 
+import java.text.Normalizer;
+
 /**
  * The track class provides the basic information about a track.
  * @author boss
@@ -8,17 +10,20 @@ package dataTypes;
 
 public class Track {
 	private String title;
-	private String artist;
+	private String[] artists;
 	private String url;
 	
 	/**
 	 * 
 	 * @param title
-	 * @param artist
+	 * @param artists
 	 */
-	public Track(String title, String artist) {
-		this.title = title;
-		this.artist = artist;
+	public Track(String title, String[] artists) {
+		//initialize attributes and remove special characters
+		this.title = Normalizer.normalize(title, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+		this.artists = artists;
+		for(String artist : this.artists)
+			artist = Normalizer.normalize(artist, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
 	}
 
 	/**
@@ -29,10 +34,10 @@ public class Track {
 	}
 
 	/**
-	 * @return the artist
+	 * @return the artists
 	 */
-	public String getArtist() {
-		return artist;
+	public String[] getArtists() {
+		return artists;
 	}
 
 	/**
