@@ -4,6 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.audio.mp3.MP3File;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.id3.ID3v24Tag;
 
 import dataTypes.Track;
 
@@ -32,13 +43,16 @@ public class YTDownloader implements Runnable{
 	 * @return process of "youtube-dl", or null if no URL is provided
 	 */
 	private  Process download() {
-		if(musicTrack.getUrl() == null)
+		if(musicTrack.getYoutubeURL() == null)
 			return null;
 		try {
 			Process youtubeDL = new ProcessBuilder("youtube-dl",
 					"-o" + musicTrack.getTitle() + "-" + musicTrack.getArtists()[0] + ".%(ext)s'",
 					"-x", "--audio-format", "mp3",
-					musicTrack.getUrl()).start();
+					musicTrack.getYoutubeURL()).start();
+			
+			musicTrack.setFileLocation(System.getProperty("user.dir") + "/" + musicTrack.getTitle()
+			+ "-" + musicTrack.getArtists()[0] + ".mp3");
 			return youtubeDL;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -86,5 +100,12 @@ public class YTDownloader implements Runnable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @return the musicTrack
+	 */
+	public Track getMusicTrack() {
+		return musicTrack;
 	}
 }
