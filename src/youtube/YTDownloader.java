@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.jaudiotagger.audio.exceptions.CannotWriteException;
@@ -41,38 +43,19 @@ public class YTDownloader implements Runnable{
 	 * @return process of "youtube-dl", or null if no URL is provided
 	 */
 	private  Process download() {
-		if(musicTrack.getUrl() == null)
+		if(musicTrack.getYoutubeURL() == null)
 			return null;
 		try {
 			Process youtubeDL = new ProcessBuilder("youtube-dl",
 					"-o" + musicTrack.getTitle() + "-" + musicTrack.getArtists()[0] + ".%(ext)s'",
 					"-x", "--audio-format", "mp3",
-					musicTrack.getUrl()).start();
-			youtubeDL.waitFor();
+					musicTrack.getYoutubeURL()).start();
 			
-			//create ID3 v2.4 Tag for downloaded mp3 file
-			MP3File downloadMP3 = new MP3File(System.getProperty("user.dir") + "/" + musicTrack.getTitle() + 
-					"-" + musicTrack.getArtists()[0] + ".mp3");
-			ID3v24Tag v24Tag = (ID3v24Tag)downloadMP3.getID3v2TagAsv24();
-			
-			//create ";"-seperated list of artist and store it into ID3 Tag
-			String artists = "";
-			for(String artist : musicTrack.getArtists())
-				artists += artist + ";";
-			artists = artists.substring(0, artists.length() -1);
-			v24Tag.addField(FieldKey.ARTIST, artists);
-			
-			v24Tag.addField(FieldKey.TITLE, musicTrack.getTitle());
-			
-			downloadMP3.commit();
-			
+			musicTrack.setFileLocation(System.getProperty("user.dir") + "/" + musicTrack.getTitle()
+			+ "-" + musicTrack.getArtists()[0] + ".mp3");
 			return youtubeDL;
 		} catch (IOException e) {
 			e.printStackTrace();
-		}catch(TagException| ReadOnlyFileException | InvalidAudioFrameException | CannotWriteException e) {
-			//TODO improve exception handling
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 		}
 		return null;
 	}
@@ -117,5 +100,12 @@ public class YTDownloader implements Runnable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @return the musicTrack
+	 */
+	public Track getMusicTrack() {
+		return musicTrack;
 	}
 }

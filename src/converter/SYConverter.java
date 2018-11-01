@@ -5,6 +5,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jaudiotagger.audio.mp3.MP3File;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.id3.ID3v24Tag;
+
 import dataTypes.Track;
 import spotify.SpotifyPlaylist;
 import spotify.TitleFinder;
@@ -39,11 +43,11 @@ public class SYConverter {
 			}else if(current.contains("playlist") && it.hasNext()) {
 				SpotifyPlaylist spotifyPlaylist = new SpotifyPlaylist();
 				//get playlist with <id>
-				String uri = it.next();
-				if(uri.matches("spotify:user:.+:playlist:.+"))
-					tracks = spotifyPlaylist.getPlaylist(uri.split(":")[4]);
+				String url = it.next();
+				if(url.matches("spotify:user:.+:playlist:.+"))
+					tracks = spotifyPlaylist.getPlaylist(url.split(":")[4]);
 				else {
-					System.err.println("Wrong Spotify URI: " + uri + "; NOTE Only playlists are valid");
+					System.err.println("Wrong Spotify URI: " + url + "; NOTE Only playlists are valid");
 					System.exit(1);
 				}
 				if(tracks == null)
@@ -67,7 +71,7 @@ public class SYConverter {
 		}
 		//set url
 		for(Track track : tracks) 
-			track.setUrl(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
+			track.setYoutubeURL(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
 		
 		//download tracks
 		for(int i = 0; i < tracks.size(); i++){
@@ -75,11 +79,31 @@ public class SYConverter {
 			YTDownloader downloader = new YTDownloader(track);
 			Thread download = new Thread(downloader);
 			download.start();
-			System.out.println(track.getUrl() + " is getting downloaded...");
+			System.out.println(track.getYoutubeURL() + " is getting downloaded...");
 			//wait for download to be finished
 			try {
 				download.join();
 			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			try {
+				//create ID3 v2.4 Tag for downloaded mp3 file
+				Track currentTrack = downloader.getMusicTrack();
+				MP3File downloadMP3 = new MP3File(currentTrack.getFileLocation().toString());
+				ID3v24Tag v24Tag = (ID3v24Tag)downloadMP3.getID3v2TagAsv24();
+				
+				//create ";"-seperated list of artist and store it into ID3 Tag
+				String artists = "";
+				for(String artist : currentTrack.getArtists())
+					artists += artist + ";";
+				artists = artists.substring(0, artists.length() -1);
+				v24Tag.addField(FieldKey.ARTIST, artists);
+				
+				v24Tag.addField(FieldKey.TITLE, currentTrack.getTitle());
+				
+				downloadMP3.commit();
+			}catch(Exception e) {
+				//TODO improve error handling
 				e.printStackTrace();
 			}
 			System.out.println(i +1 + "/" + tracks.size() + " downloaded");

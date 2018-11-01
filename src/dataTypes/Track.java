@@ -1,5 +1,6 @@
 package dataTypes;
 
+import java.net.URI;
 import java.text.Normalizer;
 
 /**
@@ -11,7 +12,8 @@ import java.text.Normalizer;
 public class Track {
 	private String title;
 	private String[] artists;
-	private String url;
+	private String youtubeURL;
+	private String fileLocation;
 	
 	/**
 	 * 
@@ -41,17 +43,31 @@ public class Track {
 	}
 
 	/**
-	 * @return the url
+	 * @return the youtubeURL
 	 */
-	public String getUrl() {
-		return url;
+	public String getYoutubeURL() {
+		return youtubeURL;
 	}
 
 	/**
-	 * @param url the url to set
+	 * @param youtubeURL the youtubeURL to set
 	 */
-	public void setUrl(String url) {
-		this.url = url;
+	public void setYoutubeURL(String URL) {
+		this.youtubeURL = URL;
+	}
+
+	/**
+	 * @return the fileLocation
+	 */
+	public String getFileLocation() {
+		return fileLocation;
+	}
+
+	/**
+	 * @param fileLocation the fileLocation to set
+	 */
+	public void setFileLocation(String fileLocation) {
+		this.fileLocation = fileLocation;
 	}
 	
 	
