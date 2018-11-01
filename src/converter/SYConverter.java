@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Filter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
@@ -20,6 +24,9 @@ import youtube.YTSearch;
  *
  */
 public class SYConverter {
+	
+	//boolean to remember, to log or not; default is off
+	boolean log = false;
 	
 	public SYConverter() {
 		
@@ -63,12 +70,15 @@ public class SYConverter {
 						+ "\t\t<playlist-uri>:\n"
 						+ "\t\tplaylist to download->...->Share->Copy Spotify URI");
 				System.exit(0);
-			}else {
+			}else if(current.equals("--verbose") || current.equals("-v")) 
+				log = true;
+			else {
 				System.err.println("Error: Invalid argument: " + current + 
 						"\nTry 'syController --help' for more information");
 				System.exit(1);
 			}
 		}
+		
 		//set url
 		for(Track track : tracks) 
 			track.setYoutubeURL(YTSearch.searchYouTube((track.getTitle() + " " + track.getArtists()[0])));
@@ -87,6 +97,8 @@ public class SYConverter {
 				e.printStackTrace();
 			}
 			try {
+				if(!log)
+					Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
 				//create ID3 v2.4 Tag for downloaded mp3 file
 				Track currentTrack = downloader.getMusicTrack();
 				MP3File downloadMP3 = new MP3File(currentTrack.getFileLocation().toString());
@@ -104,7 +116,6 @@ public class SYConverter {
 				downloadMP3.commit();
 			}catch(Exception e) {
 				//TODO improve error handling
-				e.printStackTrace();
 			}
 			System.out.println(i +1 + "/" + tracks.size() + " downloaded");
 		}
@@ -112,5 +123,34 @@ public class SYConverter {
 
 	public static void main(String[] args){
 		new SYConverter().download(args);
+	}
+	
+	/**
+	 * Turn off all logs, apart of warnings and errors
+	 * @author boss
+	 *
+	 */
+	private class OffFilter implements Filter{
+
+		@Override
+		public boolean isLoggable(LogRecord record) {
+			/*
+			if(record.getLevel().equals(Level.SEVERE) || record.getLevel().equals(Level.WARNING))
+				return true;*/
+			return false;
+		}
+	}
+	
+	/**
+	 * Turn on all logs for verbose output.
+	 * @author boss
+	 *
+	 */
+	private class VerboseFilter implements Filter{
+
+		@Override
+		public boolean isLoggable(LogRecord record) {
+			return true;
+		}
 	}
 }
