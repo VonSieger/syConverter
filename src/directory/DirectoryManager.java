@@ -44,7 +44,7 @@ public class DirectoryManager implements PlaylistGetter {
         @Override
         public List<Track> getPlaylist(String id) {
                 File[] fileTracks = directory.listFiles(new MP3Filter());
-                List<Track> tracks = new ArrayList(fileTracks.length);
+                List<Track> tracks = new ArrayList<Track>(fileTracks.length);
                 for(File file : fileTracks) {
                         try {
 							MP3File mp3Track = new MP3File(file);
@@ -62,7 +62,7 @@ public class DirectoryManager implements PlaylistGetter {
         }
         
      private String[] convertToArtistArray(String artistsString) {
-    	 List<String> artists = new LinkedList();
+    	 List<String> artists = new LinkedList<String>();
     	 while(artistsString.contains(";")) {
     		 artists.add(artistsString.substring(0, artistsString.indexOf(listSeperator)));
     		 artistsString = artistsString.substring(artistsString.indexOf(listSeperator) +1);
