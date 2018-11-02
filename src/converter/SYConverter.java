@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.id3.ID3v24Tag;
@@ -124,8 +125,12 @@ public class SYConverter {
 				v24Tag.addField(FieldKey.TITLE, currentTrack.getTitle());
 				
 				downloadMP3.commit();
+			}catch(ReadOnlyFileException e) {
+				e.printStackTrace();
+				System.err.println("Cannot write to " + downloader.getMusicTrack().getFileLocation() + ". Only having read "
+						+ "permissions");
 			}catch(Exception e) {
-				//TODO improve error handling
+				e.printStackTrace();
 			}
 			System.out.println(i +1 + "/" + tracks.size() + " downloaded");
 		}
