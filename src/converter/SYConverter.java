@@ -1,9 +1,12 @@
 package converter;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Filter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -13,7 +16,9 @@ import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.id3.ID3v24Tag;
 
+import dataTypes.PlaylistGetter;
 import dataTypes.Track;
+import directory.DirectoryManager;
 import spotify.SpotifyPlaylist;
 import spotify.TitleFinder;
 import youtube.YTDownloader;
@@ -68,7 +73,8 @@ public class SYConverter {
 						+ "\t--current : Dowload the current song. The current song is the song returned by playerctl(dbus).\n"
 						+ "\t--playlist <playlist-uri> : Download the specified playlist from youtube.\n"
 						+ "\t\t<playlist-uri>:\n"
-						+ "\t\tplaylist to download->...->Share->Copy Spotify URI");
+						+ "\t\tplaylist to download->...->Share->Copy Spotify URI"
+						+ "\t-v/--verbose show verbose output");
 				System.exit(0);
 			}else if(current.equals("--verbose") || current.equals("-v")) 
 				log = true;
@@ -78,6 +84,12 @@ public class SYConverter {
 				System.exit(1);
 			}
 		}
+		
+		if(!log)
+			Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
+		
+		List<Track> localTracks = new DirectoryManager(System.getProperty("user.dir")).getPlaylist(null);
+		tracks = sortOut(tracks, localTracks);
 		
 		//set url
 		for(Track track : tracks) 
@@ -97,8 +109,6 @@ public class SYConverter {
 				e.printStackTrace();
 			}
 			try {
-				if(!log)
-					Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
 				//create ID3 v2.4 Tag for downloaded mp3 file
 				Track currentTrack = downloader.getMusicTrack();
 				MP3File downloadMP3 = new MP3File(currentTrack.getFileLocation().toString());
@@ -107,7 +117,7 @@ public class SYConverter {
 				//create ";"-seperated list of artist and store it into ID3 Tag
 				String artists = "";
 				for(String artist : currentTrack.getArtists())
-					artists += artist + ";";
+					artists += artist + PlaylistGetter.listSeperator;
 				artists = artists.substring(0, artists.length() -1);
 				v24Tag.addField(FieldKey.ARTIST, artists);
 				
@@ -120,37 +130,61 @@ public class SYConverter {
 			System.out.println(i +1 + "/" + tracks.size() + " downloaded");
 		}
 	}
+	
+	/**
+	 * Compares two playlists(playlist fetched from spotify and tracks from local files).
+	 * Tracks occurring in both, the spotify playlist and the local files, are going to be forgotton, because there is no need
+	 * of removing them from the file system or to download them.
+	 * Tracks occurring only in the spotify playlist, but not in the local tracks will be returned as "toBeDownloaded".
+	 * Tracks occurring only in the localTracks but not in the spotify playlist are going to be removed from the file system.
+	 * @param spotifyPlaylist
+	 * @param localTracks
+	 * @return List of tracks to be downloaded
+	 */
+	private List<Track>sortOut(List<Track> spotifyPlaylist, List<Track>localTracks){
+		//create HashMap out of localTracks
+		//key: <title>-<artist1artist2...artistN>
+		HashMap<String, Track> toBeRemoved = new HashMap<String, Track>();
+		for(Track cur : localTracks) 
+			toBeRemoved.put(createKey(cur), cur);
+		
+		//compare spotify playlist to local tracks
+		for(Iterator<Track> it = spotifyPlaylist.iterator(); it.hasNext();) {
+			Track curSpotify = it.next();
+			Track curLocal = toBeRemoved.get(createKey(curSpotify));
+			//no need to download or remove
+			if(curLocal != null) {
+				it.remove();
+				toBeRemoved.remove(createKey(curSpotify));
+			}
+		}
+		
+		//remove local files, which are not in spotify playlist
+		for(Map.Entry<String, Track> curLocal : toBeRemoved.entrySet()) {
+			File curFile = new File(curLocal.getValue().getFileLocation());
+			try {
+				curFile.delete();
+				System.out.println(curFile.getAbsolutePath() + " was removed.");
+			}catch(SecurityException e) {
+				System.err.println(e.getMessage() + "\nCannot remove tracks not included in your spotify playlist.");
+			}
+		}
+		return spotifyPlaylist;
+	}
 
+	/**
+	 * 
+	 * @param artists
+	 * @return key created from Track.title and Track.artists
+	 */
+	private String createKey(Track track) {
+		String artistsString = "";
+		for(String artist : track.getArtists())
+			artistsString += artist;
+		return track.getTitle() + artistsString.trim();
+	}
+	
 	public static void main(String[] args){
 		new SYConverter().download(args);
-	}
-	
-	/**
-	 * Turn off all logs, apart of warnings and errors
-	 * @author boss
-	 *
-	 */
-	private class OffFilter implements Filter{
-
-		@Override
-		public boolean isLoggable(LogRecord record) {
-			/*
-			if(record.getLevel().equals(Level.SEVERE) || record.getLevel().equals(Level.WARNING))
-				return true;*/
-			return false;
-		}
-	}
-	
-	/**
-	 * Turn on all logs for verbose output.
-	 * @author boss
-	 *
-	 */
-	private class VerboseFilter implements Filter{
-
-		@Override
-		public boolean isLoggable(LogRecord record) {
-			return true;
-		}
 	}
 }
