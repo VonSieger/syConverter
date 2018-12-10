@@ -1,5 +1,5 @@
 # syConverter
-Tool for downloading current spotify song from YouTube
+Tool for downloading current song or a playlist from spotify from YouTube.
 
 ## Dependencies
 - [playerctl](https://github.com/acrisci/playerctl)
